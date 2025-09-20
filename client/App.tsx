@@ -39,7 +39,9 @@ const App = () => (
             </Routes>
           </main>
           <footer className="border-t text-center text-sm text-muted-foreground py-4">
-            <div className="container">Made with care for youth mental wellness • Saathi</div>
+            <div className="container">
+              Made with care for youth mental wellness • Saathi
+            </div>
           </footer>
         </div>
       </BrowserRouter>

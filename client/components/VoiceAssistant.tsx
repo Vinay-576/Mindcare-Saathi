@@ -23,23 +23,39 @@ function listVoices(): SpeechSynthesisVoice[] {
 function pickFemaleVoice(preferLocale: string): SpeechSynthesisVoice | null {
   const voices = listVoices();
   if (!voices.length) return null;
-  const female = voices.filter((v) => /female|woman|aarti|priya|neural|wavenet/i.test(`${v.name} ${v.lang}`));
-  const inLocale = female.find((v) => v.lang.toLowerCase().startsWith(preferLocale.toLowerCase()));
-  return inLocale || female[0] || voices.find((v) => v.lang.toLowerCase().startsWith(preferLocale.toLowerCase())) || voices[0] || null;
+  const female = voices.filter((v) =>
+    /female|woman|aarti|priya|neural|wavenet/i.test(`${v.name} ${v.lang}`),
+  );
+  const inLocale = female.find((v) =>
+    v.lang.toLowerCase().startsWith(preferLocale.toLowerCase()),
+  );
+  return (
+    inLocale ||
+    female[0] ||
+    voices.find((v) =>
+      v.lang.toLowerCase().startsWith(preferLocale.toLowerCase()),
+    ) ||
+    voices[0] ||
+    null
+  );
 }
 
 export default function VoiceAssistant() {
-  const [messages, setMessages] = useState<Message[]>([{
-    role: "assistant",
-    content:
-      "Hi, I'm your Saathi—an empathetic companion. This space is private. Share what's on your mind, or press the mic to speak.",
-  }]);
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      role: "assistant",
+      content:
+        "Hi, I'm your Saathi—an empathetic companion. This space is private. Share what's on your mind, or press the mic to speak.",
+    },
+  ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [listening, setListening] = useState(false);
   const [videoOn, setVideoOn] = useState(false);
   const [language, setLanguage] = useState<Lang>("auto");
-  const [availableVoices, setAvailableVoices] = useState<SpeechSynthesisVoice[]>([]);
+  const [availableVoices, setAvailableVoices] = useState<
+    SpeechSynthesisVoice[]
+  >([]);
   const [selectedVoiceURI, setSelectedVoiceURI] = useState<string>("");
   const [forceFemale, setForceFemale] = useState(true);
 
@@ -72,7 +88,9 @@ export default function VoiceAssistant() {
       if (v) return v;
     }
     const lang = language === "auto" ? "en-IN" : language;
-    return forceFemale ? pickFemaleVoice(lang) : availableVoices.find((v) => v.lang.startsWith(lang)) || null;
+    return forceFemale
+      ? pickFemaleVoice(lang)
+      : availableVoices.find((v) => v.lang.startsWith(lang)) || null;
   };
 
   const speak = (text: string, hint: string) => {
@@ -96,7 +114,10 @@ export default function VoiceAssistant() {
         setVideoOn(false);
         return;
       }
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: true,
+        audio: true,
+      });
       mediaStreamRef.current = stream;
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
@@ -109,7 +130,9 @@ export default function VoiceAssistant() {
   };
 
   const toggleListening = () => {
-    const SpeechRecognition: any = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    const SpeechRecognition: any =
+      (window as any).SpeechRecognition ||
+      (window as any).webkitSpeechRecognition;
     if (!SpeechRecognition) {
       setListening(false);
       return;
@@ -152,7 +175,10 @@ export default function VoiceAssistant() {
       });
       const data = await res.json();
       const reply: string = data.reply ?? "I'm here for you.";
-      const merged = [...next, { role: "assistant", content: reply } as Message];
+      const merged = [
+        ...next,
+        { role: "assistant", content: reply } as Message,
+      ];
       setMessages(merged);
       speak(reply, reply);
     } catch (e) {
@@ -187,7 +213,11 @@ export default function VoiceAssistant() {
               </select>
             </label>
             <label className="inline-flex items-center gap-2 ml-auto">
-              <input type="checkbox" checked={forceFemale} onChange={(e)=>setForceFemale(e.target.checked)} />
+              <input
+                type="checkbox"
+                checked={forceFemale}
+                onChange={(e) => setForceFemale(e.target.checked)}
+              />
               <span>Female voice</span>
             </label>
           </div>
@@ -210,8 +240,13 @@ export default function VoiceAssistant() {
           </div>
           <div className="mt-3 flex-1 space-y-3 overflow-auto pr-1">
             {messages.map((m, i) => (
-              <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
-                <div className={`max-w-[80%] rounded-2xl px-4 py-2 text-sm shadow ${m.role === "user" ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground"}`}>
+              <div
+                key={i}
+                className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}
+              >
+                <div
+                  className={`max-w-[80%] rounded-2xl px-4 py-2 text-sm shadow ${m.role === "user" ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground"}`}
+                >
                   {m.content}
                 </div>
               </div>
@@ -230,29 +265,55 @@ export default function VoiceAssistant() {
               onChange={(e) => setInput(e.target.value)}
               placeholder="Type how you're feeling…"
             />
-            <Button type="button" variant={listening ? "secondary" : "default"} onClick={toggleListening} aria-label="Speak">
+            <Button
+              type="button"
+              variant={listening ? "secondary" : "default"}
+              onClick={toggleListening}
+              aria-label="Speak"
+            >
               <Mic className="h-4 w-4" />
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+              {loading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Send className="h-4 w-4" />
+              )}
               <span className="sr-only">Send</span>
             </Button>
           </form>
           <p className="mt-2 text-xs text-muted-foreground">
-            This assistant is supportive and not a substitute for professional care. If you are in danger or thinking about self-harm, call Kiran Helpline 1800-599-0019 (India) or your local emergency number.
+            This assistant is supportive and not a substitute for professional
+            care. If you are in danger or thinking about self-harm, call Kiran
+            Helpline 1800-599-0019 (India) or your local emergency number.
           </p>
         </div>
         <div className="order-1 md:order-2">
           <div className="aspect-video rounded-lg border overflow-hidden bg-black/5">
-            <video ref={videoRef} className="h-full w-full object-cover" muted playsInline />
+            <video
+              ref={videoRef}
+              className="h-full w-full object-cover"
+              muted
+              playsInline
+            />
           </div>
           <div className="mt-3 flex items-center gap-2">
-            <Button onClick={toggleCamera} variant={videoOn ? "secondary" : "default"}>
-              {videoOn ? <VideoOff className="h-4 w-4" /> : <Video className="h-4 w-4" />}
+            <Button
+              onClick={toggleCamera}
+              variant={videoOn ? "secondary" : "default"}
+            >
+              {videoOn ? (
+                <VideoOff className="h-4 w-4" />
+              ) : (
+                <Video className="h-4 w-4" />
+              )}
               {videoOn ? "Stop camera" : "Start camera"}
             </Button>
-            <div className={`inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs ${listening ? "bg-green-50 border-green-200 text-green-700 dark:bg-green-900/20 dark:text-green-300" : "text-muted-foreground"}`}>
-              <Volume2 className="h-3.5 w-3.5" /> {listening ? "Listening…" : "Mic off"}
+            <div
+              className={`inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs ${listening ? "bg-green-50 border-green-200 text-green-700 dark:bg-green-900/20 dark:text-green-300" : "text-muted-foreground"}`}
+            >
+              <Volume2 className="h-3.5 w-3.5" />{" "}
+              {listening ? "Listening…" : "Mic off"}
             </div>
           </div>
         </div>

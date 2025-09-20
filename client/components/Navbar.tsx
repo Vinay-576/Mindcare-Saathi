@@ -4,9 +4,12 @@ import { Sun, Moon, Bell } from "lucide-react";
 import { useEffect, useState } from "react";
 
 function useTheme() {
-  const [theme, setTheme] = useState<string>(() =>
-    localStorage.getItem("theme") ||
-    (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"),
+  const [theme, setTheme] = useState<string>(
+    () =>
+      localStorage.getItem("theme") ||
+      (window.matchMedia("(prefers-color-scheme: dark)").matches
+        ? "dark"
+        : "light"),
   );
   useEffect(() => {
     const root = document.documentElement;
@@ -19,7 +22,9 @@ function useTheme() {
 
 export default function Navbar() {
   const { theme, setTheme } = useTheme();
-  const [notifGranted, setNotifGranted] = useState(Notification.permission === "granted");
+  const [notifGranted, setNotifGranted] = useState(
+    Notification.permission === "granted",
+  );
   const location = useLocation();
 
   const requestNotifications = async () => {
@@ -76,7 +81,12 @@ export default function Navbar() {
           </Link>
         </nav>
         <div className="flex items-center gap-2">
-          <Link to="/signin" className="hidden sm:inline text-sm text-muted-foreground hover:text-foreground">Sign in</Link>
+          <Link
+            to="/signin"
+            className="hidden sm:inline text-sm text-muted-foreground hover:text-foreground"
+          >
+            Sign in
+          </Link>
           <Link to="/signup">
             <Button size="sm">Sign up</Button>
           </Link>
@@ -86,7 +96,11 @@ export default function Navbar() {
             aria-label="Toggle theme"
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
           >
-            {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+            {theme === "dark" ? (
+              <Sun className="h-5 w-5" />
+            ) : (
+              <Moon className="h-5 w-5" />
+            )}
           </Button>
           <Button
             variant={notifGranted ? "secondary" : "default"}

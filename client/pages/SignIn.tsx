@@ -18,23 +18,52 @@ export default function SignIn() {
         onSubmit={(e) => {
           e.preventDefault();
           if (!email || !password) {
-            toast({ title: "Missing fields", description: "Please enter email and password." });
+            toast({
+              title: "Missing fields",
+              description: "Please enter email and password.",
+            });
             return;
           }
-          toast({ title: "Sign in", description: "Demo only — authentication coming soon." });
+          toast({
+            title: "Sign in",
+            description: "Demo only — authentication coming soon.",
+          });
         }}
       >
         <div>
-          <label className="text-sm" htmlFor="email">Email</label>
-          <Input id="email" type="email" placeholder="you@example.com" value={email} onChange={(e)=>setEmail(e.target.value)} />
+          <label className="text-sm" htmlFor="email">
+            Email
+          </label>
+          <Input
+            id="email"
+            type="email"
+            placeholder="you@example.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
         </div>
         <div>
-          <label className="text-sm" htmlFor="password">Password</label>
-          <Input id="password" type="password" placeholder="••••••••" value={password} onChange={(e)=>setPassword(e.target.value)} />
+          <label className="text-sm" htmlFor="password">
+            Password
+          </label>
+          <Input
+            id="password"
+            type="password"
+            placeholder="••••••••"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
         </div>
-        <Button type="submit" className="w-full">Sign in</Button>
+        <Button type="submit" className="w-full">
+          Sign in
+        </Button>
       </form>
-      <p className="mt-4 text-sm text-muted-foreground">No account? <Link to="/signup" className="underline">Sign up</Link></p>
+      <p className="mt-4 text-sm text-muted-foreground">
+        No account?{" "}
+        <Link to="/signup" className="underline">
+          Sign up
+        </Link>
+      </p>
     </div>
   );
 }

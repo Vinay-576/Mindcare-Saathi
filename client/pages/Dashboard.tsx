@@ -15,13 +15,17 @@ const MOODS: { key: MoodKey; label: string; emoji: string; color: string }[] = [
   { key: "verybad", label: "Very bad", emoji: "🌧️", color: "bg-rose-600" },
 ];
 
-interface Entry { date: string; mood: MoodKey; saved?: boolean }
+interface Entry {
+  date: string;
+  mood: MoodKey;
+  saved?: boolean;
+}
 
 const key = "saathi.moods";
 
 function startOfDay(d: Date) {
   const x = new Date(d);
-  x.setHours(0,0,0,0);
+  x.setHours(0, 0, 0, 0);
   return x;
 }
 
@@ -57,26 +61,42 @@ export default function Dashboard() {
 
   const setMood = (m: MoodKey) => {
     if (today?.saved) {
-      toast({ title: "Already submitted", description: "You've saved today's mood. Come back tomorrow." });
+      toast({
+        title: "Already submitted",
+        description: "You've saved today's mood. Come back tomorrow.",
+      });
       return;
     }
     setEntries((prev) => {
       const others = prev.filter((e) => e.date !== todayKey);
-      return [...others, { date: todayKey, mood: m, saved: false }].sort((a, b) => a.date.localeCompare(b.date));
+      return [...others, { date: todayKey, mood: m, saved: false }].sort(
+        (a, b) => a.date.localeCompare(b.date),
+      );
     });
   };
 
   const saveToday = () => {
     if (!today?.mood) {
-      toast({ title: "Select a mood", description: "Choose how you feel, then save." });
+      toast({
+        title: "Select a mood",
+        description: "Choose how you feel, then save.",
+      });
       return;
     }
     if (today.saved) {
-      toast({ title: "Already submitted", description: "Today's mood is already saved." });
+      toast({
+        title: "Already submitted",
+        description: "Today's mood is already saved.",
+      });
       return;
     }
-    setEntries((prev) => prev.map((e) => (e.date === todayKey ? { ...e, saved: true } : e)));
-    toast({ title: "Saved", description: "Today's mood saved. Keep your streak going!" });
+    setEntries((prev) =>
+      prev.map((e) => (e.date === todayKey ? { ...e, saved: true } : e)),
+    );
+    toast({
+      title: "Saved",
+      description: "Today's mood saved. Keep your streak going!",
+    });
   };
 
   const showEmergency = today?.mood === "bad" || today?.mood === "verybad";
@@ -98,13 +118,19 @@ export default function Dashboard() {
     <div className="container py-10 space-y-8">
       <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight">Your wellness dashboard</h1>
-          <p className="text-muted-foreground">Track how you feel and build a healthy streak.</p>
+          <h1 className="text-3xl font-extrabold tracking-tight">
+            Your wellness dashboard
+          </h1>
+          <p className="text-muted-foreground">
+            Track how you feel and build a healthy streak.
+          </p>
         </div>
         <div className="inline-flex items-center gap-2 rounded-xl border px-4 py-2">
           <Flame className="h-5 w-5 text-orange-500" />
           <span className="text-sm">Current streak</span>
-          <span className="font-bold">{streak} day{streak === 1 ? "" : "s"}</span>
+          <span className="font-bold">
+            {streak} day{streak === 1 ? "" : "s"}
+          </span>
         </div>
       </div>
 
@@ -135,9 +161,16 @@ export default function Dashboard() {
           </div>
           <div className="mt-4 flex items-center justify-between gap-3">
             <div className="text-sm text-muted-foreground">
-              {today?.saved ? "Today's mood is saved." : today?.mood ? "Not saved yet." : "Select a mood to save."}
+              {today?.saved
+                ? "Today's mood is saved."
+                : today?.mood
+                  ? "Not saved yet."
+                  : "Select a mood to save."}
             </div>
-            <Button onClick={saveToday} disabled={!today?.mood || !!today?.saved}>
+            <Button
+              onClick={saveToday}
+              disabled={!today?.mood || !!today?.saved}
+            >
               {today?.saved ? "Saved" : "Save today"}
             </Button>
           </div>
@@ -153,12 +186,17 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-sm">
-              If you’re feeling unsafe or thinking about self‑harm, please reach out now. You matter and help is available.
+              If you’re feeling unsafe or thinking about self‑harm, please reach
+              out now. You matter and help is available.
             </p>
             <div className="flex flex-wrap gap-3">
               <a href="tel:18005990019">
-                <Button variant="destructive" className="inline-flex items-center gap-2">
-                  <PhoneCall className="h-4 w-4" /> Call Kiran Helpline (1800‑599‑0019)
+                <Button
+                  variant="destructive"
+                  className="inline-flex items-center gap-2"
+                >
+                  <PhoneCall className="h-4 w-4" /> Call Kiran Helpline
+                  (1800‑599‑0019)
                 </Button>
               </a>
               <a href="tel:112">
@@ -172,7 +210,8 @@ export default function Dashboard() {
               </Link>
             </div>
             <p className="text-xs text-muted-foreground">
-              Saathi is supportive but not a substitute for professional care. If you’re in immediate danger, call your local emergency number.
+              Saathi is supportive but not a substitute for professional care.
+              If you’re in immediate danger, call your local emergency number.
             </p>
           </CardContent>
         </Card>
@@ -187,15 +226,29 @@ export default function Dashboard() {
             {last14.map((d) => {
               const mood = d.mood;
               const color =
-                mood === "excellent" ? "bg-teal-500" :
-                mood === "good" ? "bg-emerald-500" :
-                mood === "okay" ? "bg-blue-500" :
-                mood === "bad" ? "bg-orange-500" :
-                mood === "verybad" ? "bg-rose-500" : "bg-muted";
+                mood === "excellent"
+                  ? "bg-teal-500"
+                  : mood === "good"
+                    ? "bg-emerald-500"
+                    : mood === "okay"
+                      ? "bg-blue-500"
+                      : mood === "bad"
+                        ? "bg-orange-500"
+                        : mood === "verybad"
+                          ? "bg-rose-500"
+                          : "bg-muted";
               return (
-                <div key={d.date} className="flex flex-col items-center text-xs text-muted-foreground">
-                  <div className={`h-8 w-8 rounded-md border ${color}`} title={d.date} />
-                  <span className="mt-1 hidden sm:block">{d.date.slice(5)}</span>
+                <div
+                  key={d.date}
+                  className="flex flex-col items-center text-xs text-muted-foreground"
+                >
+                  <div
+                    className={`h-8 w-8 rounded-md border ${color}`}
+                    title={d.date}
+                  />
+                  <span className="mt-1 hidden sm:block">
+                    {d.date.slice(5)}
+                  </span>
                 </div>
               );
             })}

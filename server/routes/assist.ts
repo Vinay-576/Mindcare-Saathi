@@ -1,10 +1,21 @@
 import { RequestHandler } from "express";
 
-function classifyMood(text: string): "crisis" | "negative" | "neutral" | "positive" {
+function classifyMood(
+  text: string,
+): "crisis" | "negative" | "neutral" | "positive" {
   const t = text.toLowerCase();
-  if (/suicide|kill myself|end my life|self-harm|cutting|jump|die|death/.test(t)) return "crisis";
-  if (/(anxious|sad|depressed|overwhelmed|stressed|panic|lonely|worthless|fail|useless)/.test(t)) return "negative";
-  if (/(grateful|happy|calm|okay|fine|better|hopeful|relieved)/.test(t)) return "positive";
+  if (
+    /suicide|kill myself|end my life|self-harm|cutting|jump|die|death/.test(t)
+  )
+    return "crisis";
+  if (
+    /(anxious|sad|depressed|overwhelmed|stressed|panic|lonely|worthless|fail|useless)/.test(
+      t,
+    )
+  )
+    return "negative";
+  if (/(grateful|happy|calm|okay|fine|better|hopeful|relieved)/.test(t))
+    return "positive";
   return "neutral";
 }
 
@@ -62,7 +73,8 @@ function buildResponse(message: string, langHint?: string): string {
       "I'm really glad you told me. Your feelings matter and you're not alone.",
       "Right now, it's important to talk to someone who can help immediately.",
       "In India, you can call the Kiran Helpline at 1800-599-0019 (24x7) or contact local emergency services.",
-      "If you want, I can stay with you and keep checking in. Would grounding help right now? " + pick,
+      "If you want, I can stay with you and keep checking in. Would grounding help right now? " +
+        pick,
     ].join(" ");
   }
   if (mood === "negative") {
@@ -91,6 +103,11 @@ export const handleAssist: RequestHandler = async (req, res) => {
     const reply = buildResponse(message, lang);
     res.status(200).json({ reply });
   } catch (e) {
-    res.status(200).json({ reply: "I'm here for you. Let's take a slow breath together: inhale 4, hold 4, exhale 6." });
+    res
+      .status(200)
+      .json({
+        reply:
+          "I'm here for you. Let's take a slow breath together: inhale 4, hold 4, exhale 6.",
+      });
   }
 };
