@@ -9,24 +9,23 @@ interface Message {
   content: string;
 }
 
-function pickFemaleVoice(preferLocale = "en-IN"): SpeechSynthesisVoice | null {
-  const voices = window.speechSynthesis.getVoices();
-  if (!voices.length) return null;
-  const candidates = voices.filter((v) =>
-    /female|woman|en-IN|india|english/i.test(`${v.name} ${v.lang}`),
-  );
-  return candidates[0] || voices.find((v) => v.lang.startsWith(preferLocale)) || voices[0] || null;
+type Lang = "auto" | "en-IN" | "hi-IN";
+
+function detectLangFromText(text: string): Lang {
+  if (/[\u0900-\u097F]/.test(text)) return "hi-IN"; // Devanagari
+  return "en-IN";
 }
 
-function speak(text: string) {
-  if (!("speechSynthesis" in window)) return;
-  const utter = new SpeechSynthesisUtterance(text);
-  const voice = pickFemaleVoice();
-  if (voice) utter.voice = voice;
-  utter.rate = 1.0;
-  utter.pitch = 1.1;
-  window.speechSynthesis.cancel();
-  window.speechSynthesis.speak(utter);
+function listVoices(): SpeechSynthesisVoice[] {
+  return window.speechSynthesis.getVoices();
+}
+
+function pickFemaleVoice(preferLocale: string): SpeechSynthesisVoice | null {
+  const voices = listVoices();
+  if (!voices.length) return null;
+  const female = voices.filter((v) => /female|woman|aarti|priya|neural|wavenet/i.test(`${v.name} ${v.lang}`));
+  const inLocale = female.find((v) => v.lang.toLowerCase().startsWith(preferLocale.toLowerCase()));
+  return inLocale || female[0] || voices.find((v) => v.lang.toLowerCase().startsWith(preferLocale.toLowerCase())) || voices[0] || null;
 }
 
 export default function VoiceAssistant() {
@@ -39,14 +38,20 @@ export default function VoiceAssistant() {
   const [loading, setLoading] = useState(false);
   const [listening, setListening] = useState(false);
   const [videoOn, setVideoOn] = useState(false);
+  const [language, setLanguage] = useState<Lang>("auto");
+  const [availableVoices, setAvailableVoices] = useState<SpeechSynthesisVoice[]>([]);
+  const [selectedVoiceURI, setSelectedVoiceURI] = useState<string>("");
+  const [forceFemale, setForceFemale] = useState(true);
+
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const mediaStreamRef = useRef<MediaStream | null>(null);
   const recognitionRef = useRef<any>(null);
   const endRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    const onVoices = () => {};
-    window.speechSynthesis.onvoiceschanged = onVoices;
+    const sync = () => setAvailableVoices(listVoices());
+    sync();
+    window.speechSynthesis.onvoiceschanged = sync;
     return () => {
       window.speechSynthesis.onvoiceschanged = null as any;
     };
@@ -55,6 +60,33 @@ export default function VoiceAssistant() {
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages.length]);
+
+  const effectiveLang = (textHint: string): string => {
+    if (language === "auto") return detectLangFromText(textHint);
+    return language;
+  };
+
+  const currentVoice = (): SpeechSynthesisVoice | null => {
+    if (selectedVoiceURI) {
+      const v = availableVoices.find((x) => x.voiceURI === selectedVoiceURI);
+      if (v) return v;
+    }
+    const lang = language === "auto" ? "en-IN" : language;
+    return forceFemale ? pickFemaleVoice(lang) : availableVoices.find((v) => v.lang.startsWith(lang)) || null;
+  };
+
+  const speak = (text: string, hint: string) => {
+    if (!("speechSynthesis" in window)) return;
+    const utter = new SpeechSynthesisUtterance(text);
+    const lang = effectiveLang(hint);
+    const v = currentVoice();
+    if (v) utter.voice = v;
+    utter.lang = lang;
+    utter.rate = 1.0;
+    utter.pitch = forceFemale ? 1.2 : 1.0;
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(utter);
+  };
 
   const toggleCamera = async () => {
     try {
@@ -88,7 +120,8 @@ export default function VoiceAssistant() {
       return;
     }
     const recognition = new SpeechRecognition();
-    recognition.lang = "en-IN";
+    const lang = language === "auto" ? "en-IN" : language;
+    recognition.lang = lang;
     recognition.interimResults = false;
     recognition.maxAlternatives = 1;
     recognition.onresult = (event: any) => {
@@ -111,22 +144,23 @@ export default function VoiceAssistant() {
     setInput("");
     setLoading(true);
     try {
+      const lang = effectiveLang(content);
       const res = await fetch("/api/assist", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: content }),
+        body: JSON.stringify({ message: content, lang }),
       });
       const data = await res.json();
       const reply: string = data.reply ?? "I'm here for you.";
       const merged = [...next, { role: "assistant", content: reply } as Message];
       setMessages(merged);
-      speak(reply);
+      speak(reply, reply);
     } catch (e) {
       console.error(e);
       const fallback =
         "I'm here to support you. While I couldn't reach the server, we can try a breathing exercise: inhale for 4, hold 4, exhale 6—repeat 3 times.";
       setMessages((m) => [...m, { role: "assistant", content: fallback }]);
-      speak(fallback);
+      speak(fallback, fallback);
     } finally {
       setLoading(false);
     }
@@ -138,8 +172,43 @@ export default function VoiceAssistant() {
         <CardTitle className="text-xl">Your companion</CardTitle>
       </CardHeader>
       <CardContent className="grid gap-4 md:grid-cols-2">
-        <div className="order-2 md:order-1 flex flex-col h-[360px]">
-          <div className="flex-1 space-y-3 overflow-auto pr-1">
+        <div className="order-2 md:order-1 flex flex-col h-[420px]">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <label className="inline-flex items-center gap-2">
+              <span>Language</span>
+              <select
+                className="rounded-md border bg-background px-2 py-1"
+                value={language}
+                onChange={(e) => setLanguage(e.target.value as Lang)}
+              >
+                <option value="auto">Auto</option>
+                <option value="en-IN">English (India)</option>
+                <option value="hi-IN">हिन्दी (India)</option>
+              </select>
+            </label>
+            <label className="inline-flex items-center gap-2 ml-auto">
+              <input type="checkbox" checked={forceFemale} onChange={(e)=>setForceFemale(e.target.checked)} />
+              <span>Female voice</span>
+            </label>
+          </div>
+          <div className="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
+            <label className="inline-flex items-center gap-2">
+              <span>Voice</span>
+              <select
+                className="rounded-md border bg-background px-2 py-1 max-w-[60%]"
+                value={selectedVoiceURI}
+                onChange={(e) => setSelectedVoiceURI(e.target.value)}
+              >
+                <option value="">Auto female</option>
+                {availableVoices.map((v) => (
+                  <option key={v.voiceURI} value={v.voiceURI}>
+                    {v.name} ({v.lang})
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+          <div className="mt-3 flex-1 space-y-3 overflow-auto pr-1">
             {messages.map((m, i) => (
               <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
                 <div className={`max-w-[80%] rounded-2xl px-4 py-2 text-sm shadow ${m.role === "user" ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground"}`}>
