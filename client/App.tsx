@@ -49,4 +49,13 @@ const App = () => (
   </QueryClientProvider>
 );
 
-createRoot(document.getElementById("root")!).render(<App />);
+const rootEl = document.getElementById("root");
+if (!rootEl) throw new Error("Root element not found");
+
+// Prevent double createRoot during HMR by reusing a global root
+const g = window as any;
+if (!g.__SAATHI_ROOT) {
+  g.__SAATHI_ROOT = createRoot(rootEl);
+}
+
+g.__SAATHI_ROOT.render(<App />);
