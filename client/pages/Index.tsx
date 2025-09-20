@@ -1,6 +1,5 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import VoiceAssistant from "@/components/VoiceAssistant";
 
 export default function Index() {
   return (
@@ -21,14 +20,34 @@ export default function Index() {
               <Link to="/dashboard">
                 <Button size="lg">Open dashboard</Button>
               </Link>
-              <a href="#assistant">
+              <Link to="/ai">
                 <Button size="lg" variant="secondary">Start a confidential chat</Button>
-              </a>
+              </Link>
             </div>
           </div>
           <div className="relative">
             <div className="absolute -inset-6 -z-10 rounded-3xl bg-gradient-to-tr from-teal-200/50 to-violet-200/50 blur-2xl dark:from-teal-900/30 dark:to-violet-900/30" />
-            <VoiceAssistant />
+            <div className="rounded-3xl border bg-card p-6 shadow-sm">
+              <div className="text-sm text-muted-foreground">Preview</div>
+              <div className="mt-2 grid grid-cols-2 gap-3">
+                <div className="rounded-xl bg-gradient-to-br from-teal-200 to-teal-100 dark:from-teal-900/40 dark:to-teal-800/20 p-6">
+                  <div className="text-xs font-medium text-teal-700 dark:text-teal-300">Privacy</div>
+                  <div className="mt-1 text-sm">End-to-end control, mic/camera off by default</div>
+                </div>
+                <div className="rounded-xl bg-gradient-to-br from-violet-200 to-violet-100 dark:from-violet-900/40 dark:to-violet-800/20 p-6">
+                  <div className="text-xs font-medium text-violet-700 dark:text-violet-300">Voice</div>
+                  <div className="mt-1 text-sm">Gentle female voice guidance</div>
+                </div>
+                <div className="rounded-xl bg-gradient-to-br from-emerald-200 to-emerald-100 dark:from-emerald-900/40 dark:to-emerald-800/20 p-6">
+                  <div className="text-xs font-medium text-emerald-700 dark:text-emerald-300">Streaks</div>
+                  <div className="mt-1 text-sm">Build healthy daily habits</div>
+                </div>
+                <div className="rounded-xl bg-gradient-to-br from-sky-200 to-sky-100 dark:from-sky-900/40 dark:to-sky-800/20 p-6">
+                  <div className="text-xs font-medium text-sky-700 dark:text-sky-300">Notifications</div>
+                  <div className="mt-1 text-sm">Gentle daily check-ins</div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>

@@ -76,6 +76,10 @@ export default function Navbar() {
           </Link>
         </nav>
         <div className="flex items-center gap-2">
+          <Link to="/signin" className="hidden sm:inline text-sm text-muted-foreground hover:text-foreground">Sign in</Link>
+          <Link to="/signup">
+            <Button size="sm">Sign up</Button>
+          </Link>
           <Button
             variant="ghost"
             size="icon"

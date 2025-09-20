@@ -12,6 +12,8 @@ import Dashboard from "./pages/Dashboard";
 import AIPage from "./pages/AI";
 import Resources from "./pages/Resources";
 import About from "./pages/About";
+import SignIn from "./pages/SignIn";
+import SignUp from "./pages/SignUp";
 import Navbar from "./components/Navbar";
 
 const queryClient = new QueryClient();
@@ -31,6 +33,8 @@ const App = () => (
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/resources" element={<Resources />} />
               <Route path="/about" element={<About />} />
+              <Route path="/signin" element={<SignIn />} />
+              <Route path="/signup" element={<SignUp />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </main>
