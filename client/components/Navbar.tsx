@@ -51,10 +51,28 @@ export default function Navbar() {
             Home
           </Link>
           <Link
+            to="/ai"
+            className={`hover:text-foreground transition-colors ${location.pathname.startsWith("/ai") ? "text-foreground" : "text-muted-foreground"}`}
+          >
+            AI
+          </Link>
+          <Link
             to="/dashboard"
             className={`hover:text-foreground transition-colors ${location.pathname.startsWith("/dashboard") ? "text-foreground" : "text-muted-foreground"}`}
           >
             Dashboard
+          </Link>
+          <Link
+            to="/resources"
+            className={`hover:text-foreground transition-colors ${location.pathname.startsWith("/resources") ? "text-foreground" : "text-muted-foreground"}`}
+          >
+            Resources
+          </Link>
+          <Link
+            to="/about"
+            className={`hover:text-foreground transition-colors ${location.pathname.startsWith("/about") ? "text-foreground" : "text-muted-foreground"}`}
+          >
+            About
           </Link>
         </nav>
         <div className="flex items-center gap-2">

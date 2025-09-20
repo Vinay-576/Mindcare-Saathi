@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Flame, CalendarDays, Smile, Frown, Meh, Laugh, Angry } from "lucide-react";
+import { Flame } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 type MoodKey = "excellent" | "good" | "okay" | "bad" | "verybad";
 
@@ -13,7 +14,7 @@ const MOODS: { key: MoodKey; label: string; emoji: string; color: string }[] = [
   { key: "verybad", label: "Very bad", emoji: "🌧️", color: "bg-rose-600" },
 ];
 
-interface Entry { date: string; mood: MoodKey }
+interface Entry { date: string; mood: MoodKey; saved?: boolean }
 
 const key = "saathi.moods";
 
@@ -28,10 +29,10 @@ function formatYMD(d: Date) {
 }
 
 function computeStreak(entries: Entry[]): number {
-  const set = new Set(entries.map((e) => e.date));
+  const map = new Map(entries.map((e) => [e.date, e.saved !== false]));
   let streak = 0;
   let cur = startOfDay(new Date());
-  while (set.has(formatYMD(cur))) {
+  while (map.get(formatYMD(cur))) {
     streak += 1;
     cur.setDate(cur.getDate() - 1);
   }
@@ -43,6 +44,7 @@ export default function Dashboard() {
     const raw = localStorage.getItem(key);
     return raw ? (JSON.parse(raw) as Entry[]) : [];
   });
+  const { toast } = useToast();
   const todayKey = formatYMD(new Date());
   const today = entries.find((e) => e.date === todayKey);
 
@@ -53,10 +55,27 @@ export default function Dashboard() {
   const streak = useMemo(() => computeStreak(entries), [entries]);
 
   const setMood = (m: MoodKey) => {
+    if (today?.saved) {
+      toast({ title: "Already submitted", description: "You've saved today's mood. Come back tomorrow." });
+      return;
+    }
     setEntries((prev) => {
       const others = prev.filter((e) => e.date !== todayKey);
-      return [...others, { date: todayKey, mood: m }].sort((a, b) => a.date.localeCompare(b.date));
+      return [...others, { date: todayKey, mood: m, saved: false }].sort((a, b) => a.date.localeCompare(b.date));
     });
+  };
+
+  const saveToday = () => {
+    if (!today?.mood) {
+      toast({ title: "Select a mood", description: "Choose how you feel, then save." });
+      return;
+    }
+    if (today.saved) {
+      toast({ title: "Already submitted", description: "Today's mood is already saved." });
+      return;
+    }
+    setEntries((prev) => prev.map((e) => (e.date === todayKey ? { ...e, saved: true } : e)));
+    toast({ title: "Saved", description: "Today's mood saved. Keep your streak going!" });
   };
 
   const last14 = useMemo(() => {
@@ -94,11 +113,13 @@ export default function Dashboard() {
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
             {MOODS.map((m) => {
               const active = today?.mood === m.key;
+              const disabled = !!today?.saved;
               return (
                 <button
                   key={m.key}
                   onClick={() => setMood(m.key)}
-                  className={`group relative rounded-2xl border p-4 text-left transition-all ${active ? `${m.color} text-white border-transparent` : "hover:border-foreground/20"}`}
+                  disabled={disabled}
+                  className={`group relative rounded-2xl border p-4 text-left transition-all ${disabled ? "opacity-70 cursor-not-allowed" : ""} ${active ? `${m.color} text-white border-transparent` : "hover:border-foreground/20"}`}
                 >
                   <div className="text-2xl mb-2">{m.emoji}</div>
                   <div className="font-semibold">{m.label}</div>
@@ -109,7 +130,14 @@ export default function Dashboard() {
               );
             })}
           </div>
-          <p className="mt-3 text-xs text-muted-foreground">You can change this anytime today.</p>
+          <div className="mt-4 flex items-center justify-between gap-3">
+            <div className="text-sm text-muted-foreground">
+              {today?.saved ? "Today's mood is saved." : today?.mood ? "Not saved yet." : "Select a mood to save."}
+            </div>
+            <Button onClick={saveToday} disabled={!today?.mood || !!today?.saved}>
+              {today?.saved ? "Saved" : "Save today"}
+            </Button>
+          </div>
         </CardContent>
       </Card>
 

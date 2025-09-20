@@ -9,6 +9,9 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Dashboard from "./pages/Dashboard";
+import AIPage from "./pages/AI";
+import Resources from "./pages/Resources";
+import About from "./pages/About";
 import Navbar from "./components/Navbar";
 
 const queryClient = new QueryClient();
@@ -24,7 +27,10 @@ const App = () => (
           <main className="flex-1">
             <Routes>
               <Route path="/" element={<Index />} />
+              <Route path="/ai" element={<AIPage />} />
               <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/resources" element={<Resources />} />
+              <Route path="/about" element={<About />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </main>
