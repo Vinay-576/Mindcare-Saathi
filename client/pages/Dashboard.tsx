@@ -118,7 +118,7 @@ export default function Dashboard() {
           <CardTitle>Last 14 days</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-7 sm:grid-cols-14 gap-2">
+          <div className="grid grid-cols-7 sm:[grid-template-columns:repeat(14,minmax(0,1fr))] gap-2">
             {last14.map((d) => {
               const mood = d.mood;
               const color =
