@@ -8,8 +8,48 @@ function classifyMood(text: string): "crisis" | "negative" | "neutral" | "positi
   return "neutral";
 }
 
-function buildResponse(message: string): string {
+function isHindi(text: string, langHint?: string) {
+  return /[\u0900-\u097F]/.test(text) || langHint?.toLowerCase() === "hi-in";
+}
+
+function buildResponse(message: string, langHint?: string): string {
   const mood = classifyMood(message);
+  const hindi = isHindi(message, langHint);
+
+  if (hindi) {
+    const tips = [
+      "4-4-6 श्वास लें: 4 तक साँस लें, 4 तक रोकें, 6 तक छोड़ें — तीन बार दोहराएँ।",
+      "क्या आप दो मिनट का ग्राउंडिंग व्यायाम करना चाहेंगे: 5 चीज़ें जो आप देखते हैं, 4 जिन्हें आप छू सकते हैं, 3 जो आप सुनते हैं, 2 जो आप सूंघते हैं, 1 जो आप चखते हैं?",
+      "हल्का चलना या स्ट्रेचिंग तनाव को कम कर सकता है — सिर्फ 3 मिनट भी मदद करता है।",
+    ];
+    const pick = tips[Math.floor(Math.random() * tips.length)];
+    if (mood === "crisis") {
+      return [
+        "आपने बताया, यह बहुत हिम्मत की बात है। आपकी भावनाएँ महत्वपूर्ण हैं और आप अकेले नहीं हैं।",
+        "अभी किसी से तुरंत बात करना ज़रूरी है जो मदद कर सके।",
+        "भारत में, आप किरण हेल्पलाइन 1800-599-0019 (24x7) पर कॉल कर सकते हैं या स्थानीय आपातकालीन सेवाओं से संपर्क करें।",
+        "मैं आपके साथ हूँ। क्या अभी ग्राउंडिंग मदद करेगी? " + pick,
+      ].join(" ");
+    }
+    if (mood === "negative") {
+      return [
+        "शेयर करने के लिए धन्यवाद। यह भारी लग रहा है, और मैं बिना किसी जजमेंट के आपके साथ हूँ।",
+        pick,
+        "यदि चाहें, तो हम कुछ विचार लिख सकते हैं या आज अपने लिए एक छोटा, दयालु कदम ��य कर सकते हैं।",
+      ].join(" ");
+    }
+    if (mood === "positive") {
+      return [
+        "यह सुनकर अच्छा लगा। ऐसे पलों को नोटिस करना दृढ़ता बनाता है।",
+        "क्या आप इसे अपनी डैशबोर्ड में लॉग करना चाहेंगे ताकि स्ट्रिक मजबूत हो?",
+      ].join(" ");
+    }
+    return [
+      "मैं सुन रहा/रही हूँ। जो भी आपके मन में है या जो मुश्किल हो रहा है, उसके बारे में थोड़ा और बताइए।",
+      pick,
+    ].join(" ");
+  }
+
   const tips = [
     "Try a 4-4-6 breath: inhale 4, hold 4, exhale 6—repeat x3.",
     "Would you like a two-minute grounding: name 5 things you see, 4 you can touch, 3 you hear, 2 you smell, 1 you taste?",
@@ -47,7 +87,8 @@ function buildResponse(message: string): string {
 export const handleAssist: RequestHandler = async (req, res) => {
   try {
     const message = (req.body?.message as string) || "";
-    const reply = buildResponse(message);
+    const lang = (req.body?.lang as string) || undefined;
+    const reply = buildResponse(message, lang);
     res.status(200).json({ reply });
   } catch (e) {
     res.status(200).json({ reply: "I'm here for you. Let's take a slow breath together: inhale 4, hold 4, exhale 6." });
