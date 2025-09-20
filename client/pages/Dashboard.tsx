@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Flame } from "lucide-react";
+import { Flame, AlertTriangle, PhoneCall } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Link } from "react-router-dom";
 
 type MoodKey = "excellent" | "good" | "okay" | "bad" | "verybad";
 
@@ -78,6 +79,8 @@ export default function Dashboard() {
     toast({ title: "Saved", description: "Today's mood saved. Keep your streak going!" });
   };
 
+  const showEmergency = today?.mood === "bad" || today?.mood === "verybad";
+
   const last14 = useMemo(() => {
     const map = new Map(entries.map((e) => [e.date, e.mood]));
     const days: { date: string; mood: MoodKey | null }[] = [];
@@ -140,6 +143,40 @@ export default function Dashboard() {
           </div>
         </CardContent>
       </Card>
+
+      {showEmergency && (
+        <Card className="border-destructive/40">
+          <CardHeader className="bg-destructive/10">
+            <CardTitle className="flex items-center gap-2 text-destructive">
+              <AlertTriangle className="h-5 w-5" /> Emergency support
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm">
+              If you’re feeling unsafe or thinking about self‑harm, please reach out now. You matter and help is available.
+            </p>
+            <div className="flex flex-wrap gap-3">
+              <a href="tel:18005990019">
+                <Button variant="destructive" className="inline-flex items-center gap-2">
+                  <PhoneCall className="h-4 w-4" /> Call Kiran Helpline (1800‑599‑0019)
+                </Button>
+              </a>
+              <a href="tel:112">
+                <Button variant="secondary">Call Emergency 112</Button>
+              </a>
+              <Link to="/ai">
+                <Button>Open AI support</Button>
+              </Link>
+              <Link to="/resources">
+                <Button variant="outline">View resources</Button>
+              </Link>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Saathi is supportive but not a substitute for professional care. If you’re in immediate danger, call your local emergency number.
+            </p>
+          </CardContent>
+        </Card>
+      )}
 
       <Card>
         <CardHeader>
